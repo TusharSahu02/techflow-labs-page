@@ -1,6 +1,7 @@
 
 import React, { useRef, useEffect } from 'react';
-import { ArrowRight } from 'lucide-react';
+import { ArrowDown } from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
@@ -10,11 +11,12 @@ gsap.registerPlugin(ScrollTrigger);
 interface LearningPathCardProps {
   title: string;
   description: string;
+  imagePath: string;
   index: number;
-  color: string;
+  isLeftAligned: boolean;
 }
 
-const LearningPathCard = ({ title, description, index, color }: LearningPathCardProps) => {
+const LearningPathCard = ({ title, description, imagePath, index, isLeftAligned }: LearningPathCardProps) => {
   const cardRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -24,75 +26,107 @@ const LearningPathCard = ({ title, description, index, color }: LearningPathCard
         { 
           opacity: 0,
           y: 50,
-          scale: 0.9
+          x: isLeftAligned ? -50 : 50
         },
         { 
           opacity: 1,
           y: 0,
-          scale: 1,
+          x: 0,
           duration: 0.8,
           ease: 'power3.out',
           scrollTrigger: {
             trigger: cardRef.current,
             start: 'top bottom-=100',
-            toggleActions: 'play none none reverse'
+            end: 'top center',
+            toggleActions: 'play none none reverse',
+            markers: false,
           },
-          delay: index * 0.2
+          delay: 0.2
         }
       );
     }
 
     return () => {
+      // Clean up ScrollTrigger instances on component unmount
       ScrollTrigger.getAll().forEach(trigger => trigger.kill());
     };
-  }, [index]);
+  }, [isLeftAligned]);
 
   return (
     <div
       ref={cardRef}
-      className={`rounded-xl p-6 shadow-lg ${color} transform transition-all duration-500 hover:translate-y-[-5px]`}
+      className={`w-full opacity-0 ${isLeftAligned ? 'md:mr-auto' : 'md:ml-auto'}`}
     >
-      <h3 className="text-xl font-bold mb-2 text-white">{title}</h3>
-      <p className="text-white/90 text-sm">{description}</p>
+      <Card className={`overflow-hidden border-0 shadow-lg ${isLeftAligned ? 'rounded-r-3xl' : 'rounded-l-3xl'} rounded-tl-3xl rounded-bl-3xl`}>
+        <div className="flex flex-col md:flex-row items-center">
+          {isLeftAligned && (
+            <div className="w-full md:w-1/3 p-6 bg-gradient-to-br from-blue-900 to-indigo-700 flex justify-center items-center">
+              <img 
+                src={imagePath} 
+                alt={title} 
+                className="w-32 h-32 object-contain"
+              />
+            </div>
+          )}
+          
+          <div className={`w-full md:w-2/3 p-6 ${isLeftAligned ? 'bg-gradient-to-r from-purple-100 to-pink-100' : 'bg-gradient-to-l from-purple-100 to-pink-100'}`}>
+            <h3 className="text-2xl font-bold mb-3 text-gray-800">{title}</h3>
+            <p className="text-gray-700">{description}</p>
+          </div>
+          
+          {!isLeftAligned && (
+            <div className="w-full md:w-1/3 p-6 bg-gradient-to-br from-indigo-700 to-blue-900 flex justify-center items-center">
+              <img 
+                src={imagePath} 
+                alt={title} 
+                className="w-32 h-32 object-contain"
+              />
+            </div>
+          )}
+        </div>
+      </Card>
     </div>
   );
 };
 
 const LearningPathFlow = () => {
-  const pathRef = useRef<HTMLDivElement>(null);
-  const lineRef = useRef<HTMLDivElement>(null);
+  const sectionRef = useRef<HTMLDivElement>(null);
+  const titleRef = useRef<HTMLDivElement>(null);
   const arrowRefs = useRef<(HTMLDivElement | null)[]>([]);
-
+  
   const paths = [
     {
       title: "Python",
-      description: "Master the fundamentals of Python programming to build a strong foundation.",
-      color: "bg-blue-600",
+      description: "Master programming, automation, data analysis, and build scalable applications with expert-led guidance.",
+      imagePath: "/lovable-uploads/473311b5-1ab5-4bc0-a742-31fb86165540.png",
+      isLeftAligned: true
     },
     {
       title: "Machine Learning",
-      description: "Dive into ML algorithms, data analysis, and model training techniques.",
-      color: "bg-purple-600",
+      description: "Learn to build intelligent models, process data efficiently, and create AI-driven solutions that adapt and excel.",
+      imagePath: "/lovable-uploads/473311b5-1ab5-4bc0-a742-31fb86165540.png",
+      isLeftAligned: false
     },
     {
-      title: "Generative AI",
-      description: "Explore cutting-edge generative models, LLMs, and AI applications.",
-      color: "bg-indigo-600",
+      title: "General AI",
+      description: "Master model creation, content generation, and AI-driven creativity with expert-led classes.",
+      imagePath: "/lovable-uploads/473311b5-1ab5-4bc0-a742-31fb86165540.png",
+      isLeftAligned: true
     },
   ];
 
   useEffect(() => {
     // Animation for section title
-    if (pathRef.current) {
+    if (titleRef.current) {
       gsap.fromTo(
-        pathRef.current,
+        titleRef.current,
         { opacity: 0, y: 30 },
         { 
           opacity: 1, 
           y: 0, 
           duration: 0.8,
           scrollTrigger: {
-            trigger: pathRef.current,
+            trigger: titleRef.current,
             start: 'top bottom-=50',
             toggleActions: 'play none none reverse'
           }
@@ -100,45 +134,27 @@ const LearningPathFlow = () => {
       );
     }
 
-    // Animation for connecting line
-    if (lineRef.current) {
-      gsap.fromTo(
-        lineRef.current,
-        { width: '0%' },
-        { 
-          width: '100%', 
-          duration: 1.5, 
-          ease: 'power2.inOut',
-          scrollTrigger: {
-            trigger: lineRef.current,
-            start: 'top bottom-=50',
-            toggleActions: 'play none none reverse'
-          }
-        }
-      );
-    }
-
-    // Animation for arrows
+    // Animation for connecting arrows
     arrowRefs.current.forEach((arrow, index) => {
       if (arrow) {
         gsap.fromTo(
           arrow,
           { 
             opacity: 0,
-            scale: 0.5,
-            rotation: -45
+            height: '0%',
           },
           { 
             opacity: 1,
-            scale: 1,
-            rotation: 0,
-            duration: 0.5,
-            delay: 0.7 + (index * 0.2),
-            ease: 'back.out(1.7)',
+            height: '100%',
+            duration: 0.8,
+            ease: 'power3.out',
             scrollTrigger: {
               trigger: arrow,
-              start: 'top bottom-=50',
-              toggleActions: 'play none none reverse'
+              start: 'top bottom',
+              end: 'bottom center',
+              toggleActions: 'play none none reverse',
+              scrub: 0.5,
+              markers: false,
             }
           }
         );
@@ -151,53 +167,46 @@ const LearningPathFlow = () => {
   }, []);
 
   return (
-    <section className="py-20 bg-white dark:bg-gray-800">
+    <section ref={sectionRef} className="py-20 bg-gradient-to-b from-white to-blue-50 dark:from-gray-900 dark:to-gray-800">
       <div className="container px-4 mx-auto">
-        <div className="max-w-3xl mx-auto text-center mb-16" ref={pathRef}>
+        <div className="max-w-3xl mx-auto text-center mb-16" ref={titleRef}>
           <div className="inline-block mb-3 px-3 py-1 rounded-full bg-primary/10 text-primary text-sm font-medium">
-            Your Learning Journey
+            Learning Path
           </div>
-          <h2 className="text-3xl md:text-4xl font-bold mb-4 gradient-text">
-            Follow Your Path to AI Mastery
+          <h2 className="text-3xl md:text-4xl font-bold mb-4 text-gray-900 dark:text-white">
+            Your Journey to AI Mastery
           </h2>
           <p className="text-lg text-gray-600 dark:text-gray-400">
-            Progress through our structured learning path to build your skills from the ground up
+            Follow our structured curriculum to build your skills from fundamentals to advanced concepts
           </p>
         </div>
 
-        <div className="max-w-4xl mx-auto relative">
-          {/* Path line */}
-          <div 
-            ref={lineRef}
-            className="absolute top-1/2 left-0 h-1 bg-gray-200 dark:bg-gray-700 transform -translate-y-1/2 z-0"
-          ></div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative z-10">
+        <div className="max-w-4xl mx-auto">
+          <div className="space-y-24 relative">
             {paths.map((path, index) => (
-              <React.Fragment key={index}>
+              <div key={index} className="relative">
                 <LearningPathCard
                   title={path.title}
                   description={path.description}
+                  imagePath={path.imagePath}
                   index={index}
-                  color={path.color}
+                  isLeftAligned={path.isLeftAligned}
                 />
+                
                 {index < paths.length - 1 && (
-                  <div 
+                  <div
                     ref={el => (arrowRefs.current[index] = el)}
-                    className="absolute hidden md:block" 
-                    style={{ 
-                      left: `${(index + 0.85) * (100/3)}%`, 
-                      top: '50%', 
-                      transform: 'translateY(-50%)',
-                      zIndex: 20
-                    }}
+                    className="absolute left-1/2 transform -translate-x-1/2 h-24 w-1 opacity-0"
+                    style={{ top: '100%' }}
                   >
-                    <div className="bg-white dark:bg-gray-800 rounded-full p-2 shadow-md">
-                      <ArrowRight className="h-5 w-5 text-primary" />
+                    <div className="w-1 bg-gray-300 dark:bg-gray-600 h-full relative">
+                      <div className="absolute -bottom-6 left-1/2 transform -translate-x-1/2 bg-white dark:bg-gray-800 rounded-full p-1 shadow-md">
+                        <ArrowDown className="h-5 w-5 text-primary" />
+                      </div>
                     </div>
                   </div>
                 )}
-              </React.Fragment>
+              </div>
             ))}
           </div>
         </div>
