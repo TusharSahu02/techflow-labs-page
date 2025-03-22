@@ -4,6 +4,7 @@ import Navbar from '@/components/Navbar';
 import HeroSection from '@/components/HeroSection';
 import FeaturesSection from '@/components/FeaturesSection';
 import VideoShowcase from '@/components/VideoShowcase';
+import LearningPathFlow from '@/components/LearningPathFlow';
 import WhyChooseUs from '@/components/WhyChooseUs';
 import CallToAction from '@/components/CallToAction';
 import Footer from '@/components/Footer';
@@ -20,6 +21,7 @@ const Index = () => {
         <HeroSection />
         <FeaturesSection />
         <VideoShowcase />
+        <LearningPathFlow />
         <WhyChooseUs />
         <CallToAction />
       </main>
